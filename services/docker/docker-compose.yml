@@ -1,0 +1,141 @@
+version: "3.9"
+
+# OphAgent Docker Compose
+# Orchestrates all pre-loaded FastAPI model microservices.
+# Run: docker-compose up -d
+
+networks:
+  ophagent_net:
+    driver: bridge
+
+volumes:
+  model_weights:
+    driver: local
+
+x-gpu-service: &gpu-defaults
+  restart: unless-stopped
+  networks:
+    - ophagent_net
+  volumes:
+    - model_weights:/app/models_weights:ro
+  environment:
+    - CUDA_VISIBLE_DEVICES=0
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: 1
+            capabilities: [gpu]
+
+services:
+
+  cfp_quality:
+    <<: *gpu-defaults
+    image: ophagent/cfp_quality:latest
+    container_name: ophagent_cfp_quality
+    ports:
+      - "8110:8110"
+    environment:
+      - MODEL_ID=cfp_quality
+      - MODEL_WEIGHT=/app/models_weights/cfp_quality/best.pth
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8110/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  cfp_disease:
+    <<: *gpu-defaults
+    image: ophagent/cfp_disease:latest
+    container_name: ophagent_cfp_disease
+    ports:
+      - "8111:8111"
+    environment:
+      - MODEL_ID=cfp_disease
+      - MODEL_WEIGHT=/app/models_weights/cfp_disease/best.pth
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8111/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  cfp_ffa_multimodal:
+    <<: *gpu-defaults
+    image: ophagent/cfp_ffa_multimodal:latest
+    container_name: ophagent_cfp_ffa
+    ports:
+      - "8112:8112"
+    environment:
+      - MODEL_ID=cfp_ffa_multimodal
+      - MODEL_WEIGHT=/app/models_weights/cfp_ffa_multimodal/best.pth
+
+  uwf_quality_disease:
+    <<: *gpu-defaults
+    image: ophagent/uwf_quality_disease:latest
+    container_name: ophagent_uwf_qd
+    ports:
+      - "8113:8113"
+    environment:
+      - MODEL_ID=uwf_quality_disease
+      - MODEL_WEIGHT=/app/models_weights/uwf_quality_disease/best.pth
+
+  cfp_glaucoma:
+    <<: *gpu-defaults
+    image: ophagent/cfp_glaucoma:latest
+    container_name: ophagent_cfp_glaucoma
+    ports:
+      - "8114:8114"
+    environment:
+      - MODEL_ID=cfp_glaucoma
+      - MODEL_WEIGHT=/app/models_weights/cfp_glaucoma/best.pth
+
+  cfp_pdr:
+    <<: *gpu-defaults
+    image: ophagent/cfp_pdr:latest
+    container_name: ophagent_cfp_pdr
+    ports:
+      - "8115:8115"
+    environment:
+      - MODEL_ID=cfp_pdr
+      - MODEL_WEIGHT=/app/models_weights/cfp_pdr/best.pth
+
+  ffa_lesion:
+    <<: *gpu-defaults
+    image: ophagent/ffa_lesion:latest
+    container_name: ophagent_ffa_lesion
+    ports:
+      - "8120:8120"
+    environment:
+      - MODEL_ID=ffa_lesion
+      - MODEL_WEIGHT=/app/models_weights/ffa_lesion/best.pth
+
+  disc_fovea:
+    <<: *gpu-defaults
+    image: ophagent/disc_fovea:latest
+    container_name: ophagent_disc_fovea
+    ports:
+      - "8121:8121"
+    environment:
+      - MODEL_ID=disc_fovea
+      - MODEL_WEIGHT=/app/models_weights/disc_fovea/best.pth
+
+  fundus_expert:
+    <<: *gpu-defaults
+    image: ophagent/fundus_expert:latest
+    container_name: ophagent_fundus_expert
+    ports:
+      - "8101:8101"
+    environment:
+      - MODEL_ID=fundus_expert
+      - MODEL_WEIGHT=/app/models_weights/fundus_expert/
+
+  vision_unite:
+    <<: *gpu-defaults
+    image: ophagent/vision_unite:latest
+    container_name: ophagent_vision_unite
+    ports:
+      - "8102:8102"
+    environment:
+      - MODEL_ID=vision_unite
+      - MODEL_WEIGHT=/app/models_weights/vision_unite/

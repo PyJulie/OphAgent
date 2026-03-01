@@ -1,0 +1,44 @@
+# OphAgent Model Service Dockerfile Template
+# Usage: Replace MODEL_ID, MODEL_PORT, MODEL_MODULE placeholders.
+#
+# Build:
+#   docker build \
+#     --build-arg MODEL_ID=cfp_quality \
+#     --build-arg MODEL_PORT=8110 \
+#     -t ophagent/cfp_quality:latest .
+
+ARG BASE_IMAGE=pytorch/pytorch:2.2.0-cuda11.8-cudnn8-runtime
+FROM ${BASE_IMAGE}
+
+# Build args
+ARG MODEL_ID=cfp_quality
+ARG MODEL_PORT=8110
+ENV MODEL_ID=${MODEL_ID}
+ENV MODEL_PORT=${MODEL_PORT}
+
+WORKDIR /app
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy source code
+COPY ophagent/ ./ophagent/
+COPY config/ ./config/
+COPY setup.py .
+
+# Install the package
+RUN pip install --no-cache-dir -e .
+
+# Model weights are mounted at runtime (see docker-compose.yml)
+VOLUME ["/app/models_weights"]
+
+EXPOSE ${MODEL_PORT}
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:${MODEL_PORT}/health || exit 1
+
+CMD uvicorn ophagent.models.inference.service:app \
+    --host 0.0.0.0 \
+    --port ${MODEL_PORT} \
+    --workers 1

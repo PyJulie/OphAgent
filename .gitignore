@@ -1,0 +1,64 @@
+# === Claude Code internal files ===
+.claude/
+
+# === Environment / secrets ===
+.env
+*.env
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# === Virtual environments ===
+venv/
+env/
+.venv/
+conda-env/
+
+# === Jupyter ===
+.ipynb_checkpoints/
+*.ipynb
+
+# === Large data / model artefacts ===
+data/
+models_weights/
+results/
+*.pth
+*.pt
+*.ckpt
+*.bin
+*.safetensors
+*.h5
+
+# === FAISS index ===
+*.index
+*_meta.jsonl
+
+# === Logs ===
+logs/
+*.log
+
+# === OS ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Docker ===
+*.tar
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo

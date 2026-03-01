@@ -1,0 +1,129 @@
+# OphAgent Deployment Configuration
+# Defines Docker container specs and Conda environment mappings for model scheduling.
+
+docker:
+  # Default base image for GPU-enabled model services
+  base_image: "pytorch/pytorch:2.2.0-cuda11.8-cudnn8-runtime"
+  network: "ophagent_net"
+  volume_mount_base: "/app/models_weights"
+
+  # Pre-loaded FastAPI services (always running)
+  services:
+    fundus_expert:
+      image: "ophagent/fundus_expert:latest"
+      port: 8101
+      gpus: "device=0"
+      mem_limit: "8g"
+      health_check: "/health"
+
+    vision_unite:
+      image: "ophagent/vision_unite:latest"
+      port: 8102
+      gpus: "device=0"
+      mem_limit: "12g"
+      health_check: "/health"
+
+    cfp_quality:
+      image: "ophagent/cfp_quality:latest"
+      port: 8110
+      gpus: "device=0"
+      mem_limit: "6g"
+      health_check: "/health"
+
+    cfp_disease:
+      image: "ophagent/cfp_disease:latest"
+      port: 8111
+      gpus: "device=0"
+      mem_limit: "6g"
+      health_check: "/health"
+
+    cfp_ffa_multimodal:
+      image: "ophagent/cfp_ffa_multimodal:latest"
+      port: 8112
+      gpus: "device=0"
+      mem_limit: "8g"
+      health_check: "/health"
+
+    uwf_quality_disease:
+      image: "ophagent/uwf_quality_disease:latest"
+      port: 8113
+      gpus: "device=0"
+      mem_limit: "6g"
+      health_check: "/health"
+
+    cfp_glaucoma:
+      image: "ophagent/cfp_glaucoma:latest"
+      port: 8114
+      gpus: "device=0"
+      mem_limit: "6g"
+      health_check: "/health"
+
+    cfp_pdr:
+      image: "ophagent/cfp_pdr:latest"
+      port: 8115
+      gpus: "device=0"
+      mem_limit: "6g"
+      health_check: "/health"
+
+    ffa_lesion:
+      image: "ophagent/ffa_lesion:latest"
+      port: 8120
+      gpus: "device=0"
+      mem_limit: "8g"
+      health_check: "/health"
+
+    disc_fovea:
+      image: "ophagent/disc_fovea:latest"
+      port: 8121
+      gpus: "device=0"
+      mem_limit: "4g"
+      health_check: "/health"
+
+conda:
+  # On-demand Conda environments for models with conflicting dependencies
+  environments:
+    fmue_env:
+      python: "3.9"
+      packages:
+        - "pytorch==1.13.0"
+        - "torchvision==0.14.0"
+        - "timm==0.6.12"
+        - "Pillow"
+        - "numpy"
+      activate_cmd: "conda activate fmue_env"
+
+    uwf_mdd_env:
+      python: "3.9"
+      packages:
+        - "pytorch==2.0.0"
+        - "torchvision==0.15.0"
+        - "timm>=0.9.0"
+        - "Pillow"
+        - "numpy"
+      activate_cmd: "conda activate uwf_mdd_env"
+
+    uwf_multi_env:
+      python: "3.9"
+      packages:
+        - "pytorch==2.0.0"
+        - "torchvision==0.15.0"
+        - "timm>=0.9.0"
+        - "Pillow"
+        - "numpy"
+      activate_cmd: "conda activate uwf_multi_env"
+
+    automorph_env:
+      python: "3.8"
+      packages:
+        - "pytorch==1.11.0"
+        - "torchvision==0.12.0"
+        - "scikit-image"
+        - "opencv-python"
+        - "Pillow"
+      activate_cmd: "conda activate automorph_env"
+
+# Shared GPU memory policy (used by scheduler)
+gpu_policy:
+  max_concurrent_conda: 2      # Max simultaneous on-demand subprocess calls
+  max_concurrent_fastapi: 10   # Max concurrent FastAPI requests per service
+  gpu_memory_fraction: 0.9
