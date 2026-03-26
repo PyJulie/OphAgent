@@ -11,6 +11,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from ophagent.utils.logger import get_logger
+
+logger = get_logger("tools.base")
+
 
 # ---------------------------------------------------------------------------
 # Tool metadata
@@ -119,9 +123,24 @@ class BaseTool(ABC):
         """
 
     def __call__(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
-        if not self._model_loaded:
-            self.load_model()
-        result = self.run(inputs)
+        try:
+            if not self._model_loaded:
+                self.load_model()
+            result = self.run(inputs)
+        except Exception as exc:
+            from config.settings import get_settings
+
+            fallback = getattr(self, "fallback_run", None)
+            settings = get_settings()
+            if not callable(fallback) or not settings.allow_fallbacks:
+                raise
+            logger.warning(
+                f"Tool {self.tool_id} failed; using fallback implementation: {exc}"
+            )
+            result = fallback(inputs, error=exc)
+            if isinstance(result, dict):
+                result.setdefault("used_fallback", True)
+                result.setdefault("degraded", True)
         result.setdefault("tool_id", self.tool_id)
         result.setdefault("success", True)
         return result
@@ -155,7 +174,36 @@ class FastAPIToolMixin:
         url = f"{base_url}:{port}{endpoint}"
         response = httpx.post(url, json=payload, timeout=timeout)
         response.raise_for_status()
-        return response.json()
+        data = response.json()
+        if isinstance(data, dict) and isinstance(data.get("result"), dict):
+            result = dict(data["result"])
+            if "latency_ms" in data:
+                result.setdefault("service_latency_ms", data["latency_ms"])
+            if "model_id" in data:
+                result.setdefault("service_model_id", data["model_id"])
+            return result
+        return data
+
+    @staticmethod
+    def _single_image_payload(image_path: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        from ophagent.utils.image_utils import image_to_base64
+        return {
+            "image_b64": image_to_base64(image_path),
+            "params": params or {},
+        }
+
+    @staticmethod
+    def _dual_image_payload(
+        cfp_path: str,
+        ffa_path: str,
+        params: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        from ophagent.utils.image_utils import image_to_base64
+        return {
+            "cfp_b64": image_to_base64(cfp_path),
+            "ffa_b64": image_to_base64(ffa_path),
+            "params": params or {},
+        }
 
     def health_check(self) -> bool:
         try:

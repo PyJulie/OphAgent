@@ -29,3 +29,7 @@ class WebSearchTool(BaseTool):
                     "snippet": r.get("body", ""),
                 })
         return {"results": results, "query": query, "count": len(results)}
+
+    def fallback_run(self, inputs: Dict[str, Any], error: Exception) -> Dict[str, Any]:
+        from ophagent.utils.fallback_inference import empty_search_results
+        return empty_search_results(inputs["query"], error=error)

@@ -11,7 +11,18 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+try:
+    from pydantic_settings import BaseSettings, SettingsConfigDict
+    _HAS_PYDANTIC_SETTINGS = True
+except ImportError:  # pragma: no cover - fallback for lean environments
+    from pydantic import BaseModel
+    _HAS_PYDANTIC_SETTINGS = False
+
+    class BaseSettings(BaseModel):
+        model_config = {}
+
+    def SettingsConfigDict(**kwargs):
+        return kwargs
 
 
 # ---------------------------------------------------------------------------
@@ -91,6 +102,17 @@ class TrainingSettings(BaseSettings):
     checkpoint_root: Path = MODEL_ROOT / "checkpoints"
 
 
+class RuntimeSettings(BaseSettings):
+    # graceful: allow heuristic fallbacks to keep the pipeline running
+    # strict: require real backends and raise on degraded execution
+    mode: str = "graceful"
+    mark_human_review_on_fallback: bool = True
+
+    @property
+    def is_strict(self) -> bool:
+        return self.mode.lower() == "strict"
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=str(PROJECT_ROOT / ".env"),
@@ -108,11 +130,19 @@ class Settings(BaseSettings):
     scheduler: ModelSchedulerSettings = Field(default_factory=ModelSchedulerSettings)
     tools: ToolSettings = Field(default_factory=ToolSettings)
     training: TrainingSettings = Field(default_factory=TrainingSettings)
+    runtime: RuntimeSettings = Field(default_factory=RuntimeSettings)
+
+    memory_index_path: Path = DATA_ROOT / "memory" / "memory.index"
+    memory_metadata_path: Path = DATA_ROOT / "memory" / "memory_meta.jsonl"
 
     # Session
     session_history_limit: int = 50   # max turns kept in short-term memory
     debug: bool = False
     log_level: str = "INFO"
+
+    @property
+    def allow_fallbacks(self) -> bool:
+        return not self.runtime.is_strict
 
     def ensure_dirs(self) -> None:
         """Create all necessary directories if they don't exist."""
@@ -124,6 +154,7 @@ class Settings(BaseSettings):
             self.knowledge_base.local_data_root,
             self.knowledge_base.textbook_root,
             self.training.checkpoint_root,
+            self.memory_index_path.parent,
         ]
         for d in dirs:
             d.mkdir(parents=True, exist_ok=True)
@@ -132,5 +163,59 @@ class Settings(BaseSettings):
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     s = Settings()
+    if not _HAS_PYDANTIC_SETTINGS:
+        _apply_env_overrides(s)
     s.ensure_dirs()
     return s
+
+
+def _apply_env_overrides(settings: Settings) -> None:
+    """Best-effort env/.env override support when pydantic-settings is unavailable."""
+
+    def _iter_env_items():
+        env_items: Dict[str, str] = {}
+        env_file = PROJECT_ROOT / ".env"
+        if env_file.exists():
+            for line in env_file.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, value = line.split("=", 1)
+                env_items.setdefault(key.strip(), value.strip())
+        env_items.update(os.environ)
+        return env_items.items()
+
+    def _convert(raw: str, current):
+        if isinstance(current, bool):
+            return raw.strip().lower() in {"1", "true", "yes", "on"}
+        if isinstance(current, int) and not isinstance(current, bool):
+            return int(raw)
+        if isinstance(current, float):
+            return float(raw)
+        if isinstance(current, Path):
+            return Path(raw)
+        if isinstance(current, list):
+            return [item.strip() for item in raw.split(",") if item.strip()]
+        return raw
+
+    prefix = "OPHAGENT_"
+    for key, raw_value in _iter_env_items():
+        if not key.startswith(prefix):
+            continue
+        parts = [part.lower() for part in key[len(prefix):].split("__") if part]
+        target = settings
+        for part in parts[:-1]:
+            if not hasattr(target, part):
+                target = None
+                break
+            target = getattr(target, part)
+        if target is None or not parts:
+            continue
+        leaf = parts[-1]
+        if not hasattr(target, leaf):
+            continue
+        current = getattr(target, leaf)
+        try:
+            setattr(target, leaf, _convert(raw_value, current))
+        except Exception:
+            setattr(target, leaf, raw_value)

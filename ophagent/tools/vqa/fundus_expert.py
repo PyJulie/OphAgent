@@ -12,12 +12,19 @@ class FundusExpertTool(FastAPIToolMixin, BaseTool):
     Output: {"answer": str, "confidence": float}
     """
     def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
-        from ophagent.utils.image_utils import image_to_base64
         return self._post(
             port=self.metadata.fastapi_port,
             endpoint="/run",
-            payload={
-                "image_b64": image_to_base64(inputs["image_path"]),
-                "question": inputs.get("question", "What abnormalities are visible?"),
-            },
+            payload=self._single_image_payload(
+                inputs["image_path"],
+                params={"question": inputs.get("question", "What abnormalities are visible?")},
+            ),
+        )
+
+    def fallback_run(self, inputs: Dict[str, Any], error: Exception) -> Dict[str, Any]:
+        from ophagent.utils.fallback_inference import vqa_response
+        return vqa_response(
+            inputs["image_path"],
+            inputs.get("question", "What abnormalities are visible?"),
+            error=error,
         )

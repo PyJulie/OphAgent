@@ -65,3 +65,7 @@ class RetSAMTool(BaseTool):
             "mask_array_b64": mask_b64,
             "area_fraction": float(mask.sum()) / (mask.size * 255),
         }
+
+    def fallback_run(self, inputs: Dict[str, Any], error: Exception) -> Dict[str, Any]:
+        from ophagent.utils.fallback_inference import segmentation_prediction
+        return segmentation_prediction(inputs["image_path"], error=error)

@@ -179,3 +179,7 @@ class GradCAMTool(BaseTool):
             "processed_heatmap_b64": to_b64((processed_cam * 255).astype(np.uint8)),
             "overlay_processed_b64": to_b64(overlay_processed),
         }
+
+    def fallback_run(self, inputs: Dict[str, Any], error: Exception) -> Dict[str, Any]:
+        from ophagent.utils.fallback_inference import gradcam_prediction
+        return gradcam_prediction(inputs["image_path"], error=error)

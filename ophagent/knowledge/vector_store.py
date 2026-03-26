@@ -195,9 +195,8 @@ class MultimodalVectorStore:
                         try:
                             data = json.loads(line)
                             if not _REQUIRED_FIELDS.issubset(data):
-                                logger.warning(
-                                    f"Skipping document missing required fields "
-                                    f"(has: {list(data.keys())})"
+                                logger.debug(
+                                    "Skipping non-vector-store record while loading metadata."
                                 )
                                 continue
                             self._documents.append(Document(**data))
@@ -222,9 +221,8 @@ class MultimodalVectorStore:
                         try:
                             data = json.loads(line)
                             if not _REQUIRED_FIELDS.issubset(data):
-                                logger.warning(
-                                    f"Skipping metric doc missing required fields "
-                                    f"(has: {list(data.keys())})"
+                                logger.debug(
+                                    "Skipping non-metric record while loading metric metadata."
                                 )
                                 continue
                             self._metric_docs.append(Document(**data))

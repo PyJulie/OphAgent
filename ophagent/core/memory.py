@@ -90,9 +90,9 @@ class LongTermMemory:
         embed_model: str = "sentence-transformers/all-MiniLM-L6-v2",
     ):
         from config.settings import get_settings
-        cfg = get_settings().knowledge_base
-        self.index_path = Path(index_path or cfg.faiss_index_path)
-        self.metadata_path = Path(metadata_path or cfg.faiss_metadata_path)
+        cfg = get_settings()
+        self.index_path = Path(index_path or cfg.memory_index_path)
+        self.metadata_path = Path(metadata_path or cfg.memory_metadata_path)
         self.embed_model_name = embed_model
 
         self._embedder = None      # lazy init
@@ -106,21 +106,33 @@ class LongTermMemory:
 
     def _get_embedder(self):
         if self._embedder is None:
-            from sentence_transformers import SentenceTransformer
-            self._embedder = SentenceTransformer(self.embed_model_name)
+            try:
+                from sentence_transformers import SentenceTransformer
+                self._embedder = SentenceTransformer(self.embed_model_name)
+            except Exception as e:
+                logger.warning(f"SentenceTransformer unavailable; using lexical memory search: {e}")
+                self._embedder = False
         return self._embedder
 
     def _build_index(self) -> None:
-        import faiss
-        import numpy as np
         if not self._entries:
             return
-        texts = [self._entry_to_text(e) for e in self._entries]
         embedder = self._get_embedder()
-        vectors = embedder.encode(texts, normalize_embeddings=True)
-        dim = vectors.shape[1]
-        self._index = faiss.IndexFlatIP(dim)   # inner-product on normalised = cosine
-        self._index.add(vectors.astype(np.float32))
+        if embedder is False:
+            self._index = None
+            return
+        try:
+            import faiss
+            import numpy as np
+
+            texts = [self._entry_to_text(e) for e in self._entries]
+            vectors = embedder.encode(texts, normalize_embeddings=True)
+            dim = vectors.shape[1]
+            self._index = faiss.IndexFlatIP(dim)   # inner-product on normalised = cosine
+            self._index.add(vectors.astype(np.float32))
+        except Exception as e:
+            logger.warning(f"FAISS unavailable; using lexical memory search: {e}")
+            self._index = None
 
     def _entry_to_text(self, entry: MemoryEntry) -> str:
         return (
@@ -146,8 +158,11 @@ class LongTermMemory:
             for entry in self._entries:
                 f.write(json.dumps(asdict(entry)) + "\n")
         if self._index is not None:
-            import faiss
-            faiss.write_index(self._index, str(self.index_path))
+            try:
+                import faiss
+                faiss.write_index(self._index, str(self.index_path))
+            except Exception as e:
+                logger.warning(f"Could not save FAISS memory index: {e}")
         logger.info("Long-term memory saved.")
 
     # ------------------------------------------------------------------
@@ -161,8 +176,17 @@ class LongTermMemory:
 
     def search(self, query: str, top_k: int = 5) -> List[MemoryEntry]:
         """Retrieve the most relevant memory entries for *query*."""
-        if not self._entries or self._index is None:
+        if not self._entries:
             return []
+        if self._index is None:
+            query_terms = {term for term in query.lower().split() if term}
+            scored = []
+            for entry in self._entries:
+                text_terms = set(self._entry_to_text(entry).lower().split())
+                overlap = len(query_terms & text_terms)
+                scored.append((overlap, entry.timestamp, entry))
+            scored.sort(key=lambda item: (item[0], item[1]), reverse=True)
+            return [entry for score, _, entry in scored[:top_k] if score > 0] or self._entries[-top_k:]
         import numpy as np
         embedder = self._get_embedder()
         q_vec = embedder.encode([query], normalize_embeddings=True).astype(np.float32)

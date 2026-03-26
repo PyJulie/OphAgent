@@ -76,6 +76,8 @@ class ToolScheduler:
             raise KeyError(f"Unknown tool: {tool_id!r}")
 
         meta = self.registry.get(tool_id)
+        if tool_id in _TOOL_CLASS_MAP:
+            return self._run_wrapper(meta, inputs)
 
         if meta.scheduling_mode == "conda":
             return self._run_conda(meta, inputs)
@@ -83,6 +85,10 @@ class ToolScheduler:
             return self._run_fastapi(meta, inputs)
         else:
             return self._run_inline(meta, inputs)
+
+    def _run_wrapper(self, meta: ToolMetadata, inputs: Dict[str, Any]) -> Dict[str, Any]:
+        tool = self._get_or_load_tool(meta)
+        return tool(inputs)
 
     # ------------------------------------------------------------------
     # Inline execution (in-process)
@@ -134,7 +140,10 @@ class ToolScheduler:
         logger.debug(f"FastAPI call -> {url}")
         response = httpx.post(url, json=inputs, timeout=120)
         response.raise_for_status()
-        return response.json()
+        data = response.json()
+        if isinstance(data, dict) and isinstance(data.get("result"), dict):
+            return data["result"]
+        return data
 
     @staticmethod
     def _wait_for_service(base_url: str, port: int, timeout: int = 30) -> None:

@@ -11,12 +11,16 @@ class CFPFFATool(FastAPIToolMixin, BaseTool):
     Output: {"labels": list[str], "probabilities": dict[str, float]}
     """
     def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
-        from ophagent.utils.image_utils import image_to_base64
         return self._post(
             port=self.metadata.fastapi_port,
             endpoint="/run",
-            payload={
-                "cfp_b64": image_to_base64(inputs["cfp_path"]),
-                "ffa_b64": image_to_base64(inputs["ffa_path"]),
-            },
+            payload=self._dual_image_payload(inputs["cfp_path"], inputs["ffa_path"]),
+        )
+
+    def fallback_run(self, inputs: Dict[str, Any], error: Exception) -> Dict[str, Any]:
+        from ophagent.utils.fallback_inference import cfp_ffa_multimodal_prediction
+        return cfp_ffa_multimodal_prediction(
+            inputs["cfp_path"],
+            inputs["ffa_path"],
+            error=error,
         )

@@ -37,8 +37,10 @@ SERVICE_MAP = {
 }
 
 
-def start_service(model_id: str, port: int, module: str, env_vars: dict):
+def start_service(model_id: str, port: int, module: str, env_vars: dict, strict: bool = False):
     env = {**os.environ, **env_vars}
+    if strict:
+        env["OPHAGENT_RUNTIME__MODE"] = "strict"
     cmd = [
         sys.executable, "-m", "uvicorn",
         f"{module}:app",
@@ -51,12 +53,12 @@ def start_service(model_id: str, port: int, module: str, env_vars: dict):
     proc.wait()
 
 
-def start_all():
+def start_all(strict: bool = False):
     processes = []
     for model_id, (port, module, env_vars) in SERVICE_MAP.items():
         p = multiprocessing.Process(
             target=start_service,
-            args=(model_id, port, module, env_vars),
+            args=(model_id, port, module, env_vars, strict),
             daemon=True,
         )
         p.start()
@@ -78,10 +80,11 @@ def main():
     parser.add_argument("--model", type=str, help="Model ID to launch")
     parser.add_argument("--port", type=int, help="Port override")
     parser.add_argument("--all", action="store_true", help="Launch all services")
+    parser.add_argument("--strict", action="store_true", help="Require real models; do not allow heuristic fallbacks")
     args = parser.parse_args()
 
     if args.all:
-        start_all()
+        start_all(strict=args.strict)
     elif args.model:
         if args.model not in SERVICE_MAP:
             print(f"Unknown model: {args.model}. Available: {list(SERVICE_MAP.keys())}")
@@ -89,7 +92,7 @@ def main():
         port, module, env_vars = SERVICE_MAP[args.model]
         if args.port:
             port = args.port
-        start_service(args.model, port, module, env_vars)
+        start_service(args.model, port, module, env_vars, strict=args.strict)
     else:
         parser.print_help()
 

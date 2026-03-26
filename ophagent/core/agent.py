@@ -171,8 +171,19 @@ class OphAgent:
             self.memory.add_turn("assistant", report)
             return response
 
+        degraded_execution = self._has_degraded_results(results)
+        if degraded_execution:
+            logger.warning("One or more tool steps ran in fallback/degraded mode.")
+            verdict.needs_human_review = True
+
         # ---- Synthesise report ----
         report = self._synthesise_report(query, verdict, past_context)
+        if degraded_execution:
+            report = (
+                "Note: one or more tool calls used degraded or fallback execution. "
+                "Human review is recommended.\n\n"
+                + report
+            )
 
         # ---- Store assistant turn ----
         self.memory.add_turn("assistant", report)
@@ -241,6 +252,20 @@ class OphAgent:
             if res.tool_name in ("cfp_quality", "uwf_quality_disease") and res.success:
                 return res.output
         return None
+
+    @staticmethod
+    def _has_degraded_results(results) -> bool:
+        for res in results.values():
+            if not res.success:
+                continue
+            output = res.output
+            if isinstance(output, dict) and (
+                output.get("used_fallback")
+                or output.get("degraded")
+                or output.get("backend") == "heuristic-fallback"
+            ):
+                return True
+        return False
 
     # ------------------------------------------------------------------
     # Interactive / streaming interface

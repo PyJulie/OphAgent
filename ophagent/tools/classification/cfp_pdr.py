@@ -12,9 +12,12 @@ class CFPPDRTool(FastAPIToolMixin, BaseTool):
              "findings": list[str]}
     """
     def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
-        from ophagent.utils.image_utils import image_to_base64
         return self._post(
             port=self.metadata.fastapi_port,
             endpoint="/run",
-            payload={"image_b64": image_to_base64(inputs["image_path"])},
+            payload=self._single_image_payload(inputs["image_path"]),
         )
+
+    def fallback_run(self, inputs: Dict[str, Any], error: Exception) -> Dict[str, Any]:
+        from ophagent.utils.fallback_inference import pdr_prediction
+        return pdr_prediction(inputs["image_path"], error=error)

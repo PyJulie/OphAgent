@@ -13,9 +13,16 @@ class UWFMDDTool(CondaToolMixin, BaseTool):
     """
     def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         from config.settings import get_settings
+        from pathlib import Path
         script = str(get_settings().project_root / self.metadata.entry_script)
+        if Path(script).resolve() == Path(__file__).resolve():
+            raise RuntimeError("No standalone UWF-MDD conda entrypoint configured.")
         return self._run_conda_script(
             script_path=script,
             inputs=inputs,
             conda_env=self.metadata.conda_env,
         )
+
+    def fallback_run(self, inputs: Dict[str, Any], error: Exception) -> Dict[str, Any]:
+        from ophagent.utils.fallback_inference import uwf_mdd_prediction
+        return uwf_mdd_prediction(inputs["image_path"], error=error)

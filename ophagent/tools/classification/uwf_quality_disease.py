@@ -11,9 +11,12 @@ class UWFQualityDiseaseTool(FastAPIToolMixin, BaseTool):
     Output: {"quality_score": float, "quality_label": str, "disease_labels": list, "probabilities": dict}
     """
     def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
-        from ophagent.utils.image_utils import image_to_base64
         return self._post(
             port=self.metadata.fastapi_port,
             endpoint="/run",
-            payload={"image_b64": image_to_base64(inputs["image_path"])},
+            payload=self._single_image_payload(inputs["image_path"]),
         )
+
+    def fallback_run(self, inputs: Dict[str, Any], error: Exception) -> Dict[str, Any]:
+        from ophagent.utils.fallback_inference import uwf_quality_disease_prediction
+        return uwf_quality_disease_prediction(inputs["image_path"], error=error)

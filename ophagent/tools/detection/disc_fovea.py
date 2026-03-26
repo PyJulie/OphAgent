@@ -13,9 +13,12 @@ class DiscFoveaTool(FastAPIToolMixin, BaseTool):
              "fovea_center": [x, y]}
     """
     def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
-        from ophagent.utils.image_utils import image_to_base64
         return self._post(
             port=self.metadata.fastapi_port,
             endpoint="/run",
-            payload={"image_b64": image_to_base64(inputs["image_path"])},
+            payload=self._single_image_payload(inputs["image_path"]),
         )
+
+    def fallback_run(self, inputs: Dict[str, Any], error: Exception) -> Dict[str, Any]:
+        from ophagent.utils.fallback_inference import disc_fovea_localisation
+        return disc_fovea_localisation(inputs["image_path"], error=error)

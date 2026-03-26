@@ -47,3 +47,8 @@ class RetiZeroTool(BaseTool):
             "label": labels[top_idx],
             "probabilities": {l: float(p) for l, p in zip(labels, probs)},
         }
+
+    def fallback_run(self, inputs: Dict[str, Any], error: Exception) -> Dict[str, Any]:
+        from ophagent.utils.fallback_inference import clip_zero_shot_prediction
+        labels = inputs.get("candidate_labels", ["normal", "abnormal"])
+        return clip_zero_shot_prediction(inputs["image_path"], labels, error=error)

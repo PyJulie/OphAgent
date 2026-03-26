@@ -40,3 +40,7 @@ class OCRDetectorTool(BaseTool):
         ]
         full_text = " ".join(b["text"] for b in blocks)
         return {"text": full_text, "blocks": blocks}
+
+    def fallback_run(self, inputs: Dict[str, Any], error: Exception) -> Dict[str, Any]:
+        from ophagent.utils.fallback_inference import ocr_prediction
+        return ocr_prediction(inputs["image_path"], error=error)
