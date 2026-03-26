@@ -191,6 +191,7 @@ python scripts/train_model.py --model cfp_quality --data-root data/cfp_quality
 | [`docs/README_en.md`](./docs/README_en.md) | 🇬🇧 English (full technical reference) |
 | [`docs/README_zh.md`](./docs/README_zh.md) | 🇨🇳 中文 |
 | [`docs/GUIDE_zh.md`](./docs/GUIDE_zh.md) | 🇨🇳 中文搭建指南 |
+| [`docs/model_card.md`](./docs/model_card.md) | Hugging Face-style model card for the OphAgent system |
 
 ## Notes
 
