@@ -1,0 +1,174 @@
+schema_version: 1
+release_version: "0.1.0"
+policy:
+  target: source-complete-weight-free
+  external_root_env: OPHAGENT_EXTERNAL_DIR
+  runtime_root_env: OPHAGENT_RUNTIME_DIR
+  profiles:
+    public-demo:
+      description: Installs redistributable public source components; model weights remain optional.
+    manuscript-full:
+      description: Requires every manuscript component and separately supplied model assets.
+
+components:
+  - id: chinese_clip
+    name: Chinese-CLIP architecture used by the CVL checkpoint
+    tools: [cfp_clip_multi_disease]
+    required_for: [public-demo, manuscript-full]
+    integration: git
+    target_dir: CVL
+    repository: https://github.com/OFA-Sys/Chinese-CLIP.git
+    revision: 31863c707501bf1605d36842f43deb78793dbc5d
+    license: MIT
+    license_status: declared
+    install_policy: automatic
+    markers:
+      - cn_clip/clip/model.py
+      - cn_clip/clip/utils.py
+    compatible_marker_sets:
+      - [CVL/clip/model.py, CVL/clip/utils.py]
+    notes: The adapter accepts the upstream cn_clip layout and the legacy CVL layout.
+
+  - id: flair
+    name: FLAIR retinal vision-language model
+    tools: [cfp_flair, cfp_clip_ensemble]
+    required_for: [public-demo, manuscript-full]
+    integration: git
+    target_dir: flair
+    repository: https://github.com/jusiro/FLAIR.git
+    revision: 9afac72a5d58851923f7b81f10c0d861f14c78f5
+    license: Apache-2.0
+    license_status: declared
+    install_policy: automatic
+    markers:
+      - flair/modeling/model.py
+    notes: This revision matches the audited local inference architecture.
+
+  - id: retizero
+    name: RetiZero retinal vision-language model
+    tools: [cfp_retizero, cfp_clip_ensemble]
+    required_for: [manuscript-full]
+    integration: git
+    target_dir: retizero
+    repository: https://github.com/LooKing9218/RetiZero.git
+    revision: d72aadc692fbe33b182c79711bccb397edffb419
+    license: null
+    license_status: upstream-license-not-declared
+    install_policy: manual-acknowledgement
+    markers:
+      - zeroshot/modeling/model.py
+    notes: OphAgent passes the manuscript prompt explicitly instead of relying on the upstream default.
+
+  - id: efiqa
+    name: EFIQA quality adapter
+    tools: [cfp_efiqa]
+    required_for: [public-demo, manuscript-full]
+    integration: built-in
+    target_dir: null
+    repository: https://github.com/penway/EFIQA.git
+    revision: e1c64d4bfc6059ebc1395052867bec651fd67d34
+    license: MIT
+    license_status: declared
+    install_policy: none
+    markers: []
+    remote_model:
+      provider: huggingface
+      id: facebook/dinov3-vitl16-pretrain-lvd1689m
+      revision: ea8dc2863c51be0a264bab82070e3e8836b02d51
+      access: gated
+    notes: OphAgent contains the inference glue; the tiny adapter parameters and gated DINOv3 backbone are model assets.
+
+  - id: glaucoma
+    name: JustRAIGS-derived glaucoma classifier
+    tools: [cfp_glaucoma, cfp_glaucoma_workup]
+    required_for: [public-demo, manuscript-full]
+    integration: built-in
+    target_dir: null
+    repository: null
+    revision: ophagent-0.1.0
+    license: project-license
+    license_status: in-house-inference-implementation
+    install_policy: none
+    markers: []
+
+  - id: pdr_cascade
+    name: Proliferative diabetic retinopathy cascade
+    tools: [cfp_pdr_cascade, cfp_dr_workup]
+    required_for: [public-demo, manuscript-full]
+    integration: built-in
+    target_dir: null
+    repository: null
+    revision: ophagent-0.1.0
+    license: project-license
+    license_status: in-house-inference-implementation
+    install_policy: none
+    markers: []
+
+  - id: retsam
+    name: ReT-SAM 2.0 retinal segmentation and quantification
+    tools: [cfp_retsam_segmentation, cfp_dr_421_assessment]
+    required_for: [manuscript-full]
+    integration: bundled
+    package_dir: retsam_2
+    target_dir: null
+    repository: null
+    revision: ophagent-0.1.0
+    license: project-license
+    license_status: approved-for-redistribution
+    install_policy: included
+    markers:
+      - scripts/infer.py
+      - scripts/quantify.py
+      - inference/model_loader.py
+      - postprocess/vessels/api.py
+    notes: The inference and quantitative post-processing source used by the adapter ships with OphAgent. Model weights remain separate.
+
+  - id: fmue
+    name: FMUE OCT classifier
+    tools: [oct_fmue_16class, oct_volume_macular]
+    required_for: [manuscript-full]
+    integration: git
+    target_dir: fmue
+    repository: https://github.com/yuanyuanpeng0129/FMUE.git
+    revision: b07ba8a797d6440826f3870f73faf567963ffc15
+    license: null
+    license_status: upstream-license-not-declared
+    install_policy: manual-acknowledgement
+    markers:
+      - vit_model.py
+      - util/pos_embed.py
+    notes: The pinned revision exactly matches the audited local inference files.
+
+  - id: octcubem
+    name: OCTCubeM volume model
+    tools: [oct_volume_octcubem]
+    required_for: [public-demo, manuscript-full]
+    integration: git
+    target_dir: OCTCubeM
+    repository: https://github.com/ZucksLiu/OCTCubeM.git
+    revision: 5b2392287c67155de841e75e701450dda89309c5
+    license: BSD-2-Clause
+    license_status: declared
+    install_policy: automatic
+    markers:
+      - inference_utils.py
+      - OCTCube/models_vit_st_flash_attn.py
+    notes: The pinned revision exactly matches the audited local inference files.
+
+  - id: g_disc
+    name: OCT optic-disc analysis pipeline
+    tools: [oct_volume_disc]
+    required_for: [manuscript-full]
+    integration: bundled
+    package_dir: g_disc_oct4
+    target_dir: null
+    repository: null
+    revision: ophagent-0.1.0
+    license: project-license
+    license_status: approved-for-redistribution
+    install_policy: included
+    markers:
+      - src/octseg/runner.py
+      - legacy_pipeline/seg1d2d_aspectfix.py
+      - legacy_pipeline/oct_all_in_one_patched.py
+    notes: The required orchestration and inference source ships with OphAgent. Checkpoints, calibration files, metadata, and operational scripts remain outside the source tree.

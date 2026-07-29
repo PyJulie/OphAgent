@@ -1,0 +1,305 @@
+schema_version: 1
+release_version: "0.1.0"
+distribution:
+  included_in_source_repository: false
+  default_root: checkpoints
+  verification: sha256
+
+assets:
+  - id: modality_classifier
+    path: _shared/modality_classifier/best.pt
+    env: OPHAGENT_MODALITY_CLASSIFIER_WEIGHTS
+    role: Four-class input-modality classifier
+    sha256: 0032f09374940e86d946290c0e3b8e836f9381838061bb47c2573b6788326016
+    size_bytes: 44787851
+    required_for: [public-demo, manuscript-full]
+
+  - id: cfp_cvl
+    path: cfp/cvl.pt
+    env: OPHAGENT_CFP_CLIP_WEIGHTS
+    role: CFP multi-disease Chinese-CLIP checkpoint
+    sha256: 7b0c0597532bfa8492c83d63140d70a9358cd27e86966333981aec3967fe6ef9
+    size_bytes: 753186978
+    required_for: [manuscript-full]
+
+  - id: cfp_flair
+    path: cfp/flair.pth
+    env: OPHAGENT_FLAIR_WEIGHTS
+    role: FLAIR retinal vision-language checkpoint
+    sha256: 348db9295ee16c74a5831a41d91eecf18e42c4abebb818b0e5f982fd62feb579
+    size_bytes: 533449839
+    required_for: [manuscript-full]
+
+  - id: cfp_retizero
+    path: cfp/retizero.pth
+    env: OPHAGENT_RETIZERO_WEIGHTS
+    role: RetiZero LoRA retinal vision-language checkpoint
+    sha256: 7d06d29441c981898bbb56abdaae1eb97e205448f0a9bc2a68e2aa9431601ede
+    size_bytes: 1653537406
+    required_for: [manuscript-full]
+
+  - id: cfp_eyeq
+    path: cfp/eyeq.pth
+    env: OPHAGENT_EYEQ_WEIGHTS
+    role: EyeQ image-quality classifier
+    sha256: 17b65e3e9a8431dc32d9fc1656840f091f10e62747bb522bbadfea71c899c9f5
+    size_bytes: 44792331
+    required_for: [manuscript-full]
+
+  - id: cfp_efiqa_adapter
+    path: cfp/efiqa_adapter.npz
+    env: OPHAGENT_EFIQA_WEIGHTS
+    role: EFIQA linear spatial-quality adapter parameters
+    sha256: c1d26168405a855555d8b2738f3d48f0051cf1919493064cae4f9bbe11987e28
+    size_bytes: 4590
+    required_for: [manuscript-full]
+    note: The gated DINOv3 backbone is resolved separately at its pinned Hugging Face revision.
+
+  - id: cfp_od_fovea
+    path: cfp/od_fovea.pt
+    env: OPHAGENT_OD_WEIGHTS
+    role: Optic-disc and fovea detector
+    sha256: eb6d3ffebf9c051c0009fc4cf5f2238c35b1937b36ebf19e388fa3843e372352
+    size_bytes: 52077586
+    required_for: [manuscript-full]
+
+  - id: cfp_glaucoma
+    path: cfp/glaucoma.pth
+    env: OPHAGENT_GLAUCOMA_WEIGHTS
+    role: Referable-glaucoma and auxiliary-sign classifier
+    sha256: f8b3f0d4295369b9d07b4d283a3a2539ab738e9edadbad99f1c37cfa227cc7e8
+    size_bytes: 1215259211
+    required_for: [manuscript-full]
+
+  - id: cfp_pdr_main
+    path: cfp/pdr_main.pth
+    env: OPHAGENT_PDR_MAIN_CKPT
+    role: Four-class PDR category classifier
+    sha256: cb4f185d12a6a488ad6e25543c1b14bff27959d50f24fac383bf6f034429de1c
+    size_bytes: 350416711
+    required_for: [manuscript-full]
+
+  - id: cfp_pdr_active
+    path: cfp/pdr_active.pth
+    env: OPHAGENT_PDR_ACTIVE_CKPT
+    role: Active-PDR reason classifier
+    sha256: d14b055e7e52b5ddb8c514c71ac0729b2fdec872db71ebef10698538dc1baa37
+    size_bytes: 16327847
+    required_for: [manuscript-full]
+
+  - id: cfp_pdr_active_thresholds
+    path: cfp/pdr_active_thr.pth
+    env: OPHAGENT_PDR_ACTIVE_THR
+    role: Active-PDR calibrated decision thresholds
+    sha256: 76b4a9139e910f9a4fc3e7f299bb87cd29e6ecd0169a406556b93fc2a6f259a2
+    size_bytes: 1343
+    required_for: [manuscript-full]
+    asset_type: calibration
+
+  - id: cfp_pdr_inactive
+    path: cfp/pdr_inactive.pth
+    env: OPHAGENT_PDR_INACTIVE_CKPT
+    role: Inactive-PDR reason classifier
+    sha256: d1e001271aec4123a573133b92c317848964b4c9c93cd55cb645274ae4fd6978
+    size_bytes: 16317607
+    required_for: [manuscript-full]
+
+  - id: cfp_pdr_inactive_thresholds
+    path: cfp/pdr_inactive_thr.pth
+    env: OPHAGENT_PDR_INACTIVE_THR
+    role: Inactive-PDR calibrated decision thresholds
+    sha256: e87117306cdc4ba526ba6b80d7c1bbf1e28349c80571c4f952b491366e519d35
+    size_bytes: 1279
+    required_for: [manuscript-full]
+    asset_type: calibration
+
+  - id: cfp_retsam
+    path: cfp/retsam.ckpt
+    env: OPHAGENT_RETSAM_CKPT
+    role: ReT-SAM 2.0 full-fundus segmentation model
+    sha256: 823cfc99edfe3ad59dc12f833bf966dde49e7141023a159676c3aced396d4749
+    size_bytes: 10805588196
+    required_for: [manuscript-full]
+
+  - id: oct_fmue
+    path: oct/fmue.pth
+    env: OPHAGENT_FMUE_WEIGHTS
+    role: FMUE multi-class OCT classifier
+    sha256: ece65c8da05bf89c0666c00e01ee4073ec65c90c47802dcfce5d0fba97152477
+    size_bytes: 1218388127
+    required_for: [manuscript-full]
+
+  - id: oct_kermany
+    path: oct/classification/kermany/best.pt
+    role: Kermany four-class OCT classifier
+    sha256: ab447b7f6901dcdb2470a7d937a2708b515bbb38962b2cf4c0f49f0e17ec4efb
+    size_bytes: 295137174
+    required_for: [manuscript-full]
+
+  - id: oct_octdl
+    path: oct/classification/octdl/best.pt
+    role: OCTDL seven-class OCT classifier
+    sha256: e8d8eb7b462c5297f5c0b4babb926c38e0c3c36a125331fcd9903196c152a5fc
+    size_bytes: 295155606
+    required_for: [manuscript-full]
+
+  - id: oct_c8
+    path: oct/classification/oct_c8/best.pt
+    role: OCT-C8 eight-class OCT classifier
+    sha256: da6a11c57d4bb84f68754980934d59e59a79075dcf946f5e087213998ad68a84
+    size_bytes: 335193793
+    required_for: [manuscript-full]
+
+  - id: oct_fluid
+    path: oct/fluid_segmentor/best.pt
+    env: OPHAGENT_OCT_FLUID_WEIGHTS
+    role: OCT fluid segmentor
+    sha256: 426f14ff9d60637ba04a1ed6e56d0abb83be57a2da409ddad69e849334ae95e6
+    size_bytes: 388187713
+    required_for: [manuscript-full]
+
+  - id: oct_layers
+    path: oct/layer_segmentor/best.pt
+    env: OPHAGENT_OCT_LAYER_WEIGHTS
+    role: OCT retinal-layer segmentor
+    sha256: ea7f91a1b3d14b3cdaf61e487309b77c94fa0c2e3d1290283095eee3cdac1961
+    size_bytes: 388190017
+    required_for: [manuscript-full]
+
+  - id: oct_quality
+    path: oct/quality_assessor/best.pt
+    env: OPHAGENT_OCT_QUALITY_WEIGHTS
+    role: OCT quality classifier
+    sha256: e9e7855ff5f9b17b42d45547348e63136eeb13debf6112c973909794c74dc1e1
+    size_bytes: 137405441
+    required_for: [manuscript-full]
+
+  - id: oct_denoiser
+    path: oct/denoiser/best.pt
+    role: OCT denoising model
+    sha256: 0fc75a3a9312c158d2e43230e78e285f39d4d45605ebcd52868d54ff7cd86333
+    size_bytes: 910013
+    required_for: [manuscript-full]
+
+  - id: oct_super_resolution
+    path: oct/super_resolver/best.pt
+    role: OCT super-resolution model
+    sha256: 8af5b415a9c6b3fd9741aa2a8a342a0047bc395d01938dc6cf8176ad50dc84e1
+    size_bytes: 1803741
+    required_for: [manuscript-full]
+
+  - id: oct_octcubem
+    path: oct_volume/octcube.pth
+    env: OPHAGENT_OCTCUBEM_WEIGHTS
+    role: OCTCubeM volume classifier
+    sha256: 2ecca281fd919056a32aa669a56666b57c022466072877afb16307db52205756
+    size_bytes: 3641115835
+    required_for: [manuscript-full]
+
+  - id: g_disc_segmentation
+    path: oct_volume/g_disc/tohoku_full_slss_013_fold0_3.522%.t7
+    env: OPHAGENT_G_DISC_SEGMENTATION_WEIGHTS
+    role: G-DISC retinal-layer segmentation checkpoint
+    sha256: 5f784d88310dd020568554743d48a47c29294f8314ec7991fc9492d06d986d18
+    size_bytes: 4699441
+    required_for: [manuscript-full]
+
+  - id: g_disc_wnet
+    path: oct_volume/g_disc/wnet_disc512_best_UCL-new3-0.793.pth
+    env: OPHAGENT_G_DISC_WNET_WEIGHTS
+    role: G-DISC optic-disc localisation checkpoint
+    sha256: 2374fc11e18e9814f146d8e27ab70d9c9bb20a8dd9d476b50304b6efb4678c37
+    size_bytes: 365738
+    required_for: [manuscript-full]
+
+  - id: g_disc_histogram_3doct
+    path: oct_volume/g_disc/3DOCT_hist.cdf
+    env: OPHAGENT_G_DISC_3DOCT_HISTOGRAM
+    role: G-DISC 3D OCT histogram calibration
+    sha256: 6b79ad5287384866b02ae7d2ab6bc862c0807292481d572b16666c0842d3a56a
+    size_bytes: 2273
+    required_for: [manuscript-full]
+    asset_type: calibration
+
+  - id: g_disc_histogram_triton
+    path: oct_volume/g_disc/Triton_hist.cdf
+    env: OPHAGENT_G_DISC_TRITON_HISTOGRAM
+    role: G-DISC Triton histogram calibration
+    sha256: d9b97109d71d31b6c469d3f61ef98f8a728b79599f66535debad07545e7c73de
+    size_bytes: 2273
+    required_for: [manuscript-full]
+    asset_type: calibration
+
+  - id: uwf_multidisease
+    path: uwf/multi_disease.pt
+    env: OPHAGENT_UWF_WEIGHTS
+    role: UWF multi-label disease classifier
+    sha256: 7509bbdf976b6f3490184369662bc6a886dda63fec67f05e0b5152db1c51136b
+    size_bytes: 85558004
+    required_for: [manuscript-full]
+
+  - id: uwf_disease7
+    path: uwf/disease7/best.pt
+    env: OPHAGENT_UWF_DISEASE7_WEIGHTS
+    role: UWF seven-class classifier
+    sha256: 0cedd531596e9ff023b5ada29cc82e39170aa4cbb363334cd23427b3bcdb9e94
+    size_bytes: 111356959
+    required_for: [manuscript-full]
+
+  - id: uwf_vessels
+    path: uwf/vessel_seg.pth
+    env: OPHAGENT_PRIME_FP20_WEIGHTS
+    role: UWF vessel segmentor
+    sha256: 1d809be5a17e2dbd3d240277c0c760a4719821b1e865ea93b3c6b32d7e884095
+    size_bytes: 97920231
+    required_for: [manuscript-full]
+
+  - id: ffa_classifier
+    path: ffa/classification.pt
+    env: OPHAGENT_FFA_CLASSIFIER_WEIGHTS
+    role: FFA multi-task classifier
+    sha256: 96fe39fd2936c3108bdc228a6c39236545f88b8e0c04e14f8292877e5546a957
+    size_bytes: 94798065
+    required_for: [manuscript-full]
+
+  - id: ffa_detector
+    path: ffa/lesion_yolo11x.pt
+    env: OPHAGENT_FFA_DETECTOR_WEIGHTS
+    role: FFA lesion detector
+    sha256: 21cf9f1b88f36870283d758257b8d4db5d29f0add632eb6fc7ec4d0f7a612f03
+    size_bytes: 114491545
+    required_for: [manuscript-full]
+
+  - id: ffa_merge_map
+    path: ffa/merge_map_ids.csv
+    env: OPHAGENT_FFA_MERGE_MAP
+    role: FFA raw-to-clinical label mapping
+    sha256: c6561f6f51370a251d5b2929a2e3efe173d427b9bc29c0b596b043dece74aa3a
+    size_bytes: 575
+    required_for: [manuscript-full]
+    asset_type: label-map
+    publish_with_source_when_cleared: true
+
+  - id: paired_cfp
+    path: paired/cfp/best.pt
+    env: OPHAGENT_PAIRED_CFP_WEIGHTS
+    role: Paired CFP branch
+    sha256: 5cd84e12e24156b12413d35c19be0bda5dcc384fbfe41e3db445a78e702c6a57
+    size_bytes: 94377005
+    required_for: [manuscript-full]
+
+  - id: paired_ffa
+    path: paired/ffa/best.pt
+    env: OPHAGENT_PAIRED_FFA_WEIGHTS
+    role: Paired FFA branch
+    sha256: 6bed9e8f6db087dcf02f0ae0c199bc21f8f53de3ed1a1321a62b3354e03c73f9
+    size_bytes: 94377005
+    required_for: [manuscript-full]
+
+  - id: paired_joint
+    path: paired/joint/best.pt
+    env: OPHAGENT_PAIRED_JOINT_WEIGHTS
+    role: Paired CFP-FFA fusion model
+    sha256: 232ab36ea21690f3bebabd489b1ae90621e626d071aba65ecf3e24d183097468
+    size_bytes: 197077613
+    required_for: [manuscript-full]

@@ -1,0 +1,31 @@
+{
+  "segmentation": {
+    "extra_args": [
+      "--fda",
+      "--ai",
+      "--batch",
+      "1",
+      "--topology",
+      "--with10",
+      "--overlay_slice",
+      "--hist_match",
+      "oct_volume/g_disc/Triton_hist.cdf",
+      "--avg",
+      "1",
+      "--clahe3d",
+      "--no_preproc"
+    ]
+  },
+  "analysis": {
+    "base_args": [
+      "--npy_kind",
+      "seg",
+      "--center_mode",
+      "wnet",
+      "--scan_range_mm",
+      "6.0",
+      "--seg_mode",
+      "auto"
+    ]
+  }
+}

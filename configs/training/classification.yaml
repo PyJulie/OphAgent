@@ -1,0 +1,35 @@
+# Classification training config
+
+task: classification
+
+data:
+  dataset: kermany
+  root: datasets/kermany
+  image_size: 224
+  batch_size: 32
+  num_workers: 4
+  val_ratio: 0.15
+  test_ratio: 0.15
+
+model:
+  backbone: resnet50
+  pretrained: true
+  num_classes: 4
+  dropout: 0.3
+  hidden_dim: 512
+
+training:
+  max_epochs: 50
+  learning_rate: 0.0001
+  weight_decay: 0.01
+  scheduler: cosine
+  patience: 15
+  grad_clip: 1.0
+  mixed_precision: true
+
+  optimizer: adamw
+  warmup_epochs: 5
+
+output:
+  dir: checkpoints/classification/${data.dataset}
+  log_interval: 50

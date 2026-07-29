@@ -1,0 +1,88 @@
+# Secrets
+.env*
+!.env.example
+# local agent / launch config (may contain API keys)
+.claude/
+.codex/
+.openai/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+.venv_*/
+venv/
+.ipynb_checkpoints/
+
+# Data & checkpoints (often huge / private)
+/checkpoints/
+/external/
+/weights/
+/runtime/
+/config/
+/cache/
+/datasets/
+/reports/
+/results/
+/validation/
+/paper/
+/review_workspace/
+/tmp/
+/annotator/
+/scripts/
+release/
+public_release/
+# retsam content-addressed mask cache (regenerable via scripts/prewarm_retsam.py)
+.retsam_cache/
+.retsam_cache_dbg/
+# local sample inputs (may contain DICOM / private data)
+/inputs/
+*.pth
+*.pt
+*.ckpt
+*.t7
+*.npy
+*.npz
+*.onnx
+*.safetensors
+*.pkl
+*.pickle
+*.zip
+*.7z
+*.tar
+*.tar.gz
+
+# Runtime logs
+/logs/
+*.log
+
+# Credentials and tunnel state
+.cloudflared/
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local clinical inputs and generated media
+**/webchat_sessions/
+**/_sessions/
+**/_uploads/
+*.dcm
+*.nii
+*.nii.gz
+*.pdf
+*.png
+*.jpg
+*.jpeg
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

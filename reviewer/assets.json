@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "project": "OphAgent",
+  "release_version": "0.1.0",
+  "profile": "manuscript-full",
+  "distribution": "separately distributed runtime archive",
+  "archive": "OphAgent-runtime-assets-0.1.0.zip",
+  "archive_root": "OphAgent-runtime-assets-0.1.0",
+  "archive_size_bytes": 23082296284,
+  "archive_sha256": "2cd3df1bba7477a7026087447187b89dadfc32716c38109483da4357c68af287",
+  "asset_count": 37,
+  "payload_size_bytes": 23082262962,
+  "link_policy": "The download location is supplied through an authorised release channel and is not stored in the public repository."
+}

@@ -1,0 +1,54 @@
+{
+  "python_cmd": null,
+  "paths": {
+    "segmentation_script": "legacy_pipeline/seg1d2d_aspectfix.py",
+    "analysis_script": "legacy_pipeline/oct_all_in_one_patched.py",
+    "analysis_disc2_script": "legacy_pipeline/oct_all_in_one-bk3.py",
+    "enface_flexible_script": "legacy_pipeline/make_enface_from_volnpy.py",
+    "enface_885_script": "legacy_pipeline/make_enface_from_volnpy.py",
+    "segmentation_checkpoint": "oct_volume/g_disc/tohoku_full_slss_013_fold0_3.522%.t7",
+    "wnet_checkpoint": "oct_volume/g_disc/wnet_disc512_best_UCL-new3-0.793.pth",
+    "histogram_3doct": "oct_volume/g_disc/3DOCT_hist.cdf",
+    "histogram_triton": "oct_volume/g_disc/Triton_hist.cdf"
+  },
+  "analysis": {
+    "scripts": {
+      "disc_script": "analysis_script",
+      "disc2_script": "analysis_disc2_script",
+      "macula_script": "analysis_script"
+    },
+    "base_args": [
+      "--npy_kind",
+      "seg",
+      "--center_mode",
+      "wnet",
+      "--scan_range_mm",
+      "6.0"
+    ],
+    "target_args": {
+      "disc": [
+        "--target",
+        "disc",
+        "--inner",
+        "2.0",
+        "--outer",
+        "4.0",
+        "--cp_append"
+      ],
+      "disc2": [
+        "--target",
+        "disc2",
+        "--d2_inner",
+        "2.8",
+        "--d2_mid",
+        "3.46",
+        "--d2_outer",
+        "4.4"
+      ],
+      "macula": [
+        "--target",
+        "macula"
+      ]
+    }
+  }
+}

@@ -1,0 +1,38 @@
+# Segmentation training config
+
+task: segmentation
+
+data:
+  dataset: retouch
+  images_dir: datasets/retouch/images
+  masks_dir: datasets/retouch/masks
+  image_size: [512, 512]
+  batch_size: 8
+  num_workers: 4
+  # Used only when val_images_dir / val_masks_dir are not provided.
+  val_ratio: 0.15
+  split_seed: 42
+
+model:
+  backbone: resnet50
+  pretrained: true
+  num_classes: 4  # Background, IRF, SRF, PED
+  use_attention: true
+
+training:
+  max_epochs: 100
+  learning_rate: 0.0001
+  weight_decay: 0.01
+  scheduler: cosine
+  patience: 20
+  grad_clip: 1.0
+  mixed_precision: true
+
+  loss:
+    type: dice_ce
+    dice_weight: 0.5
+    ce_weight: 0.5
+
+output:
+  dir: checkpoints/segmentation/${data.dataset}
+  log_interval: 20
