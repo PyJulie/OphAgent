@@ -2,6 +2,8 @@
 
 # OphAgent
 
+## Overview
+
 **OphAgent is a tool-using, multimodal ophthalmology assistant with a conversational Web UI.** It supports context-aware, multi-turn analysis: users can ask follow-up questions, inspect intermediate evidence, and reason across several images of the same eye. The agent remembers prior findings and tools already run instead of restarting the pipeline on every turn.
 
 It covers four modalities, **color fundus photography (CFP)**, **OCT**, **ultra-wide-field fundus (UWF)** and **fluorescein angiography (FFA)**. Through dialogue it performs quality assessment, disease classification, lesion/vessel segmentation and cross-modal interpretation, and runs a consistency check before committing to a conclusion.
@@ -13,6 +15,38 @@ It covers four modalities, **color fundus photography (CFP)**, **OCT**, **ultra-
 - **Multi-turn memory** — the full conversation history is kept, so you can ask follow-ups ("which quadrant is the hemorrhage mainly in?", "what would adding an OCT show?") without restating background.
 - **Result reuse** — tool outputs already computed for an image are cached and reused on follow-ups, with no redundant recomputation.
 - **Multi-image sessions** — attach several images of different modalities for the same eye in one session; the agent reasons across them jointly.
+
+---
+
+## Quick start
+
+The shortest path to the code-only Web UI is:
+
+```bash
+git clone https://github.com/PyJulie/OphAgent.git
+cd OphAgent
+pip install -e .
+ophagent-web
+```
+
+Open `http://127.0.0.1:8765`, then configure a provider, model, and API key
+under **Personalize > API**. This starts the public code release; specialist
+model tools become available after the separately distributed runtime assets
+are installed. Continue to [Installation](#installation) for the full runtime
+and [Reproducibility and safety checks](#reproducibility-and-safety-checks)
+before treating a run as equivalent to the complete evaluation stack.
+
+For command-line use, run `python demos/chat.py --configure-provider`.
+
+## Tutorials
+
+The bilingual, chapter-based tutorials cover the complete
+planner-executor-verifier workflow, multimodal routing, Web deployment, and
+model-adapter extension:
+
+- [English tutorial](tutorials/en/index.md)
+- [Simplified Chinese tutorial](tutorials/zh-CN/index.md)
+- [Prompt architecture and runtime source map](docs/PROMPT_ARCHITECTURE.md)
 
 ---
 
@@ -44,15 +78,9 @@ flowchart TD
 
 > Planner → Executor → Verifier forms a loop: on a failed check it returns to the Planner to order more tools and re-plan, until it passes or honestly reports "undetermined".
 
-Core code lives under `ophagent/`:
-
-| Directory | Purpose |
-|---|---|
-| `ophagent/adapters/` | Per-modality model adapters + the global registry |
-| `ophagent/chat/` | Session engine, tool orchestration, verification, effort levels |
-| `ophagent/webchat/` | Web service (FastAPI), model catalog, session management |
-| `ophagent/agent/` | Tool abstractions and dispatch |
-| `ophagent/training/` | Training components |
+The implementation is organized around model adapters, orchestration,
+verification, the Web service, and shared tool abstractions. See
+[Repository layout](#repository-layout) for the source map.
 
 ---
 
@@ -70,13 +98,10 @@ Core code lives under `ophagent/`:
 
 ## Installation
 
-```bash
-git clone https://github.com/PyJulie/OphAgent.git
-cd OphAgent
-pip install -e .
-```
+The [Quick start](#quick-start) installs the base package. See `pyproject.toml`
+for dependencies (PyTorch, torchvision, timm, FastAPI, an OpenAI-compatible
+SDK, etc.).
 
-See `pyproject.toml` for dependencies (PyTorch, torchvision, timm, FastAPI, an OpenAI-compatible SDK, etc.).
 Install the optional OCT optic-disc runtime when that tool is required:
 
 ```bash
@@ -123,6 +148,17 @@ acknowledgement because those revisions declare no license. See
 boundary and verification workflow are documented in
 [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md) and
 [`docs/VALIDATION.md`](docs/VALIDATION.md).
+
+### Release boundary
+
+This repository **does not include model weights, credentials, datasets, or
+generated results**. The public asset manifest records the expected path,
+size, and SHA-256 for each weight. The code installs and imports without
+weights, while preflight reports which tools are available. A runtime with
+missing tools must not be interpreted as equivalent to the complete
+evaluation configuration. Configure separately distributed assets through
+`OPHAGENT_RUNTIME_DIR` and the checkpoint/source overrides documented in
+`.env.example`.
 
 ---
 
@@ -223,18 +259,6 @@ and verification. The guided CLI requests a missing key with hidden input and
 uses it only for that process. Run `python demos/chat.py --help` for provider and
 role-specific model options.
 
-## Tutorials
-
-The bilingual, chapter-based tutorials cover the complete
-planner-executor-verifier workflow, multimodal routing, Web deployment, and
-model-adapter extension:
-
-- [English tutorial](tutorials/en/index.md)
-- [Prompt architecture and runtime source map](docs/PROMPT_ARCHITECTURE.md)
-- [简体中文教程](tutorials/zh-CN/index.md)
-
----
-
 ## Reproducibility and safety checks
 
 After placing separately supplied weights under the private runtime, verify
@@ -301,21 +325,6 @@ treated as a full-pipeline diagnostic run when the required keys, weights,
 adapter paths, and preflight checks are satisfied; otherwise
 degraded/refusal/insufficient-data states are part of the expected safety
 behaviour.
-
----
-
-## Model weights
-
-This repository **does not include model weights, credentials, datasets, or generated results**. Configure separately distributed model files through `OPHAGENT_RUNTIME_DIR`, the root-level checkpoint/source overrides, or the per-adapter environment variables documented in `.env.example`.
-
-The public asset manifest records the expected path, size, and SHA-256 for each
-weight. The code installs and imports without weights. Preflight reports which
-tools are available; missing tools must not be interpreted as a full
-manuscript-equivalent deployment. ReT-SAM 2.0 and G-DISC use the bundled,
-checkpoint-compatible inference source; the manuscript-full profile also
-requires the pinned RetiZero and FMUE upstream checkouts.
-Checkpoint archive installation is documented in
-[`docs/RUNTIME_ASSETS.md`](docs/RUNTIME_ASSETS.md).
 
 ---
 

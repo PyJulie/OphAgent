@@ -2,6 +2,8 @@
 
 # OphAgent
 
+## 概览
+
 **OphAgent 是带工具调度能力的多模态眼科助手，并提供对话式 Web UI。** 它支持带上下文记忆的多轮分析：用户可以追问、检查中间证据，并围绕同一只眼的多张影像持续推理。系统会记住此前的发现与已运行工具，而不是每次从零开始。
 
 支持**彩色眼底照相（CFP）**、**OCT**、**超广角眼底（UWF）**与**荧光素血管造影（FFA）**四种模态，通过对话即可完成质量评估、疾病分类、病灶/血管分割与跨模态联合解读，并在给出结论前自动做一致性核验。
@@ -13,6 +15,35 @@
 - **多轮对话记忆**：保留完整会话历史，可直接追问（"出血主要在哪个象限？""如果加做 OCT 会怎样？"），无需重述背景。
 - **结果复用**：同一张影像已运行过的工具结果会被缓存，追问时直接复用、不重复推理。
 - **多影像会话**：可在同一会话中挂载同眼的多张不同模态影像，agent 跨影像联合判断。
+
+---
+
+## 快速开始
+
+启动代码版网页端的最短路径是：
+
+```bash
+git clone https://github.com/PyJulie/OphAgent.git
+cd OphAgent
+pip install -e .
+ophagent-web
+```
+
+浏览器打开 `http://127.0.0.1:8765`，然后在 **个性化 > API** 中配置供应方、
+模型和 API 密钥。这会启动公开代码版；安装单独分发的运行资产后，
+专用模型工具才会可用。如需完整运行环境，继续阅读[安装](#安装)；在将本地运行
+视为完整评估配置前，请完成[运行前检查](#运行前检查)。
+
+命令行用户可运行 `python demos/chat.py --configure-provider`。
+
+## 教程
+
+双语分章教程覆盖完整的 Planner–Executor–Verifier 工作流、多模态路由、
+Web 部署和模型适配器扩展：
+
+- [简体中文教程](tutorials/zh-CN/index.md)
+- [English tutorial](tutorials/en/index.md)
+- [Prompt 架构与运行时源码导航](docs/PROMPT_ARCHITECTURE.md)
 
 ---
 
@@ -44,15 +75,8 @@ flowchart TD
 
 > Planner → Executor → Verifier 形成闭环：核验不通过时回到 Planner 补检并重规划，直到通过或如实标注"不确定"。
 
-核心代码位于 `ophagent/`：
-
-| 目录 | 作用 |
-|---|---|
-| `ophagent/adapters/` | 各模态模型适配器 + 全局注册表 |
-| `ophagent/chat/` | 会话引擎、工具编排、核验逻辑、效力分级 |
-| `ophagent/webchat/` | 网页服务（FastAPI）、模型目录、会话管理 |
-| `ophagent/agent/` | 工具抽象与调度 |
-| `ophagent/training/` | 训练相关组件 |
+实现围绕模型适配器、工具编排与核验、Web 服务和共享工具抽象组织。
+源码导航见[目录结构](#目录结构)。
 
 ---
 
@@ -70,13 +94,9 @@ flowchart TD
 
 ## 安装
 
-```bash
-git clone https://github.com/PyJulie/OphAgent.git
-cd OphAgent
-pip install -e .
-```
+[快速开始](#快速开始)已完成基础包安装。完整依赖见 `pyproject.toml`（PyTorch、torchvision、
+timm、FastAPI、OpenAI 兼容 SDK 等）。
 
-依赖见 `pyproject.toml`（PyTorch、torchvision、timm、FastAPI、OpenAI 兼容 SDK 等）。
 如需运行 OCT 视盘定量分析，请同时安装对应的可选依赖：
 
 ```bash
@@ -115,6 +135,13 @@ ReT-SAM 2.0 与 G-DISC 的推理源码已随 OphAgent 发布。RetiZero 与 FMUE
 [`THIRD_PARTY.md`](THIRD_PARTY.md)。源码与运行目录的边界及验证流程见
 [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md) 和
 [`docs/VALIDATION.md`](docs/VALIDATION.md)。
+
+### 发布边界
+
+本仓库**不包含模型权重、密钥、数据集或生成结果**。公开资产清单记录每个权重的
+预期路径、大小和 SHA-256。代码在没有权重时仍可安装和导入，预检程序会列出
+当前可用工具。缺失工具的运行环境不能视为与完整评估配置等价。单独分发的资产通过
+`OPHAGENT_RUNTIME_DIR` 以及 `.env.example` 中记录的 checkpoint/源码路径变量进行配置。
 
 ---
 
@@ -205,16 +232,6 @@ python demos/chat.py --configure-provider  # 从分组列表选择供应方与�
 专用工具调用与结果核验。分步配置会以隐藏输入读取缺失的 API 密钥，并且只在本次
 进程内使用。运行 `python demos/chat.py --help` 可查看供应方及各角色模型配置。
 
-## 教程
-
-双语分章教程覆盖完整的“规划器—执行器—核验器”流程、多模态路由、Web 部署及
-模型适配器扩展：
-
-- [中文教程](tutorials/zh-CN/index.md)
-- [English tutorial](tutorials/en/index.md)
-
----
-
 ## 运行前检查
 
 将单独获得的权重放入私有运行目录后，先根据公开清单核对文件大小和 SHA-256：
@@ -241,16 +258,6 @@ python -m ophagent.reviewer_smoke
 ```
 
 成功时返回退出码 `0` 和包含 `"ok": true` 的 JSON。该命令检查无效输入、非眼科输入及无法验证眼科范围时的拒绝，核心观察器全部失败时的诊断抑制，以及无新工具调用的最终化路径；它不替代完整预检或诊断性能验证。完整命令、字段及各项检查的适用范围见 `docs/VALIDATION.md`。
-
----
-
-## 模型权重
-
-本仓库**不包含模型权重、密钥、数据集或生成结果**。单独分发的模型文件可通过 `OPHAGENT_RUNTIME_DIR`、模型根目录变量或 `.env.example` 中列出的适配器级环境变量进行配置。
-
-公开模型资产清单记录了每个权重的预期路径、大小和 SHA-256。代码在没有权重时仍可安装和导入。预检程序会列出当前可用工具；缺失模型的运行环境不能视为与论文完整评估栈等价。ReT-SAM 2.0 与 G-DISC 使用仓库内自带且与 checkpoint 匹配的推理源码；论文完整配置还需要按锁定版本安装 RetiZero 与 FMUE 的上游源码。
-checkpoint 压缩包的安装步骤见
-[`docs/RUNTIME_ASSETS.zh-CN.md`](docs/RUNTIME_ASSETS.zh-CN.md)。
 
 ---
 
