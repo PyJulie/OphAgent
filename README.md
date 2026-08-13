@@ -8,13 +8,11 @@
 
 It covers four modalities, **color fundus photography (CFP)**, **OCT**, **ultra-wide-field fundus (UWF)** and **fluorescein angiography (FFA)**. Through dialogue it performs quality assessment, disease classification, lesion/vessel segmentation and cross-modal interpretation, and runs a consistency check before committing to a conclusion.
 
-> For research and decision-support only. **Not a medical diagnosis.** All outputs must be confirmed by a qualified ophthalmologist together with the patient's history and examination.
+## Interactive Web UI
 
-### "Context" works on three levels
+OphAgent provides a conversational Web interface for analysing ophthalmic images. Users can upload them, ask free-form clinical questions, select the model provider and reasoning configuration, and export structured reports. The interface automatically identifies the imaging modality and presents the resulting tool execution and verification process in configurable Clean, Split, or Inline views.
 
-- **Multi-turn memory** — the full conversation history is kept, so you can ask follow-ups ("which quadrant is the hemorrhage mainly in?", "what would adding an OCT show?") without restating background.
-- **Result reuse** — tool outputs already computed for an image are cached and reused on follow-ups, with no redundant recomputation.
-- **Multi-image sessions** — attach several images of different modalities for the same eye in one session; the agent reasons across them jointly.
+![OphAgent Web UI](docs/assets/ophagent-web-ui.png)
 
 ---
 
