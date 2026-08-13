@@ -1003,7 +1003,7 @@ async function refreshSessions() {
     const updated = new Date(it.updated_at * 1000);
     const updatedText = Number.isNaN(updated.getTime())
       ? "Unknown date"
-      : updated.toLocaleString([], {
+      : updated.toLocaleString(document.documentElement.lang || "en", {
           year: updated.getFullYear() === new Date().getFullYear() ? undefined : "numeric",
           month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
         });
