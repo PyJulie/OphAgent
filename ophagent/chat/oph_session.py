@@ -1126,6 +1126,22 @@ Being honest about limits is **safer and more useful** than bluffing.
 """
 
 
+_RESPONSE_LANGUAGE_CONTRACT = """\
+# Response language contract
+- Infer the response language from the latest user message unless the user
+  explicitly requests a different output language.
+- Use that language for every user-visible part of the response, including
+  planning/status text, headings, interpretation, differential diagnosis,
+  recommendations, and the final answer.
+- Do not inherit the language of earlier assistant messages, tool outputs,
+  bilingual labels, provider defaults, or server locale.
+- Preserve registered tool/model names, clinical abbreviations, numerical
+  values, and machine-readable field names where appropriate.
+- This contract applies across every reasoning-effort tier and model-backed
+  component, and overrides conflicting style examples.
+"""
+
+
 @dataclass
 class OphContext:
     current_image: str | None = None
@@ -2254,6 +2270,10 @@ class OphSession:
         # tools before hitting the "insufficient evidence" gate.
         if not focused_profile:
             sys_msg["content"] += "\n\n" + self._modality_feasibility_hint()
+
+        # Keep this turn-level contract last so it remains salient across
+        # providers, effort tiers, and focused prompt profiles.
+        sys_msg["content"] += "\n\n" + _RESPONSE_LANGUAGE_CONTRACT
 
         request_messages = [sys_msg] + self.messages
         tools = self._toolkit.get_all_schemas()
