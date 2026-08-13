@@ -14,6 +14,12 @@ OphAgent provides a conversational Web interface for analysing ophthalmic images
 
 ![OphAgent Web UI](docs/assets/ophagent-web-ui.png)
 
+## Navigation
+
+| Get started | Understand OphAgent | Configure & validate | Learn & extend |
+|---|---|---|---|
+| [Quick start](#quick-start) · [Installation](#installation) · [Usage](#usage) | [Features](#features) · [Architecture](#architecture) · [Tools](#tools-by-modality) | [Configuration](#configuration) · [Reproducibility checks](#reproducibility-and-safety-checks) · [Security](#security--deployment) | [Tutorials](#tutorials) · [Repository layout](#repository-layout) · [License](#license) |
+
 ---
 
 ## Quick start
