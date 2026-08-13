@@ -6,7 +6,7 @@
 
 **OphAgent is a tool-using, multimodal ophthalmology assistant with a conversational Web UI.** It supports context-aware, multi-turn analysis: users can ask follow-up questions, inspect intermediate evidence, and reason across several images of the same eye. The agent remembers prior findings and tools already run instead of restarting the pipeline on every turn.
 
-It covers four modalities, **color fundus photography (CFP)**, **OCT**, **ultra-wide-field fundus (UWF)** and **fluorescein angiography (FFA)**. Through dialogue it performs quality assessment, disease classification, lesion/vessel segmentation and cross-modal interpretation, and runs a consistency check before committing to a conclusion.
+It currently covers four modalities, **color fundus photography (CFP)**, **OCT**, **ultra-wide-field fundus (UWF)** and **fluorescein angiography (FFA)**, which appropriate models set. Through dialogue it performs quality assessment, disease classification, lesion/vessel segmentation and cross-modal interpretation, and runs a consistency check before committing to a conclusion.
 
 ## Interactive Web UI
 
