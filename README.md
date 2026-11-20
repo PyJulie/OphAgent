@@ -104,7 +104,9 @@ verification, the Web service, and shared tool abstractions. See
 
 The [Quick start](#quick-start) installs the base package. See `pyproject.toml`
 for dependencies (PyTorch, torchvision, timm, FastAPI, an OpenAI-compatible
-SDK, etc.).
+SDK, etc.). OphAgent installs under Python 3.9 or newer. Fully pinned
+environments in which the tests pass are listed in
+[`environments/`](environments/README.md).
 
 Install the optional OCT optic-disc runtime when that tool is required:
 

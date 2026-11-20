@@ -99,7 +99,8 @@ flowchart TD
 ## 安装
 
 [快速开始](#快速开始)已完成基础包安装。完整依赖见 `pyproject.toml`（PyTorch、torchvision、
-timm、FastAPI、OpenAI 兼容 SDK 等）。
+timm、FastAPI、OpenAI 兼容 SDK 等）。OphAgent 支持 Python 3.9 及以上版本；测试全部通过的
+完整固定版本环境见 [`environments/`](environments/README.md)。
 
 如需运行 OCT 视盘定量分析，请同时安装对应的可选依赖：
 

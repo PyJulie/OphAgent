@@ -112,6 +112,37 @@ The Web checkpoint page uses the same packaged asset manifest, so a new clone
 does not require a developer-generated local manifest. A runtime
 `checkpoints/MANIFEST.yaml` remains an optional authorised override.
 
+## Software environments
+
+Release 0.1.0 installs under Python 3.9 or newer. Dependencies are declared
+in `pyproject.toml` with minimum versions. PyTorch 2.6 or newer is required,
+because the checkpoint loaders read the released weights with
+`weights_only=True` and an explicit allow-list of permitted classes
+(`torch.serialization.safe_globals`), which earlier PyTorch versions do not
+provide.
+
+Two fully resolved environments in which the test suite and the offline
+safety checks pass are recorded in
+[`environments/`](../environments/README.md):
+
+| File | Python | PyTorch | Torchvision |
+|---|---|---|---|
+| `environments/tested-python3.9.txt` | 3.9 | 2.8.0 | 0.23.0 |
+| `environments/tested-python3.10.txt` | 3.10 | 2.14.1 | 0.29.2 |
+
+Install one of them by passing the file as a constraints file:
+
+```bash
+python -m pip install -e ".[dev]" -c environments/tested-python3.9.txt
+```
+
+The experiments reported in the manuscript were run before this release was
+prepared, with Python 3.9, PyTorch 2.2.1 (CUDA 11.8), Torchvision 0.17.1,
+NumPy 1.26.4, Pandas 2.2.2 and Pillow 10.3.0, and each integrated model ran in
+its native software environment. The release reads the same checkpoint files,
+which are verified by SHA-256, and differs from that environment in the
+PyTorch version for the reason given above.
+
 ## Meaning of each check
 
 - `ophagent-assets verify` proves that the supplied files match the released

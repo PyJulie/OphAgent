@@ -25,7 +25,7 @@ or generated reports.
 
 ## Requirements
 
-- Python 3.10 or newer and Git.
+- Python 3.9 or newer and Git.
 - A CUDA-capable NVIDIA GPU is recommended for the complete local tool set.
 - A filesystem that supports files larger than 4 GB.
 - At least 50 GiB free when the downloaded ZIP and extracted runtime share a

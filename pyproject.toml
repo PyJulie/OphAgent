@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "OphAgent: conversational multimodal ophthalmology AI agent (CFP / OCT / UWF / FFA)"
 readme = {file = "README.md", content-type = "text/markdown"}
 license-files = ["LICENSE", "THIRD_PARTY.md"]
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 dependencies = [
     "torch>=2.6.0",
     "torchvision>=0.21.0",
@@ -103,4 +103,4 @@ pythonpath = ["."]
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+target-version = "py39"

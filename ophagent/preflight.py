@@ -122,10 +122,10 @@ class PreflightReport:
 # ──────────────────────────────────────────────────────────────────────────
 def check_python() -> Check:
     v = sys.version.split()[0]
-    if sys.version_info < (3, 10):
-        return Check("Python ≥ 3.10", "FAIL",
-                     f"found {v} — OphAgent requires Python 3.10+")
-    return Check("Python ≥ 3.10", "OK", f"Python {v}")
+    if sys.version_info < (3, 9):
+        return Check("Python ≥ 3.9", "FAIL",
+                     f"found {v} — OphAgent requires Python 3.9+")
+    return Check("Python ≥ 3.9", "OK", f"Python {v}")
 
 
 def check_torch_cuda() -> tuple[Check, Check]:
