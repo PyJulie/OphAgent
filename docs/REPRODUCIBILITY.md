@@ -37,8 +37,10 @@ Create an isolated environment and a separate runtime:
 ```bash
 git clone https://github.com/PyJulie/OphAgent.git
 cd OphAgent
-python -m venv .venv
-pip install -e ".[oct-disc]"
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[oct-disc,dev]"
 export OPHAGENT_RUNTIME_DIR="$HOME/ophagent-runtime"
 mkdir -p "$OPHAGENT_RUNTIME_DIR/checkpoints"
 cp .env.example "$OPHAGENT_RUNTIME_DIR/.env"
@@ -50,11 +52,17 @@ PowerShell:
 git clone https://github.com/PyJulie/OphAgent.git
 Set-Location OphAgent
 python -m venv .venv
-pip install -e ".[oct-disc]"
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -e ".[oct-disc,dev]"
 $env:OPHAGENT_RUNTIME_DIR = "$HOME\ophagent-runtime"
 New-Item -ItemType Directory -Force "$env:OPHAGENT_RUNTIME_DIR\checkpoints"
 Copy-Item .env.example "$env:OPHAGENT_RUNTIME_DIR\.env"
 ```
+
+The `dev` extra installs `pytest`, which the test suite below requires. The
+commands in the rest of this guide assume that the virtual environment is
+active.
 
 Install redistributable external source at the revisions recorded in
 `ophagent/resources/components.yaml`:
@@ -90,9 +98,15 @@ deployment:
 ```bash
 ophagent-assets verify --profile manuscript-full
 ophagent-components status --profile manuscript-full
-pytest -q
+python -m pytest -q
 ophagent-preflight --json --no-save-json
 ```
+
+Run the test suite from the repository root. It needs no checkpoints, API
+keys, or network access, and reports 82 passing tests at release 0.1.0. The
+plain `pytest -q` command gives the same result, because the test
+configuration in `pyproject.toml` adds the repository root to the import
+path.
 
 The Web checkpoint page uses the same packaged asset manifest, so a new clone
 does not require a developer-generated local manifest. A runtime
@@ -105,8 +119,8 @@ does not require a developer-generated local manifest. A runtime
   redistribute those files.
 - `ophagent-components status` proves that required external source is present
   at the locked revision, or reports a release blocker.
-- `pytest` checks deterministic code behaviour without claiming clinical
-  performance.
+- `python -m pytest -q` checks deterministic code behaviour without claiming
+  clinical performance.
 - The full `ophagent-preflight` loads the configured runtime stack and reports
   missing or failed tools. It must pass before a run is described as using the
   full configured pipeline.

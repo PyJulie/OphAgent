@@ -94,6 +94,13 @@ include = ["ophagent*"]
 "ophagent.components.g_disc_oct4.configs" = ["*.json"]
 "ophagent.components.g_disc_oct4.configs.pipeline" = ["*.json"]
 
+[tool.pytest.ini_options]
+# The suite imports the top-level `reviewer` package, which is not installed with
+# `ophagent`. Adding the repository root to the import path makes `pytest -q` and
+# `python -m pytest -q` equivalent when run from a source checkout.
+testpaths = ["tests"]
+pythonpath = ["."]
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"
