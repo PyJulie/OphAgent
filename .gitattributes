@@ -19,3 +19,4 @@
 *.pth binary
 *.safetensors binary
 *.zip binary
+*.txt text eol=lf
