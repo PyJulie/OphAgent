@@ -1938,7 +1938,27 @@ def _expose_messages(messages: list[dict],
     return out
 
 
+_USAGE = """usage: ophagent-web
+
+Start the OphAgent Web UI. The command takes no arguments. It is configured
+through environment variables or <OPHAGENT_RUNTIME_DIR>/.env:
+
+  OPH_WEB_HOST          interface to bind (default 127.0.0.1)
+  OPH_WEB_PORT          port to bind (default 8765)
+  WEB_USERNAME, WEB_PASSWORD
+                        Basic Auth, required before binding a public interface
+  OPHAGENT_RUNTIME_DIR  private runtime with .env, checkpoints/ and reports/
+
+See README.md and docs/RUNTIME_ASSETS.md for the complete configuration.
+"""
+
+
 def main():
+    import sys
+
+    if any(arg in {"-h", "--help"} for arg in sys.argv[1:]):
+        print(_USAGE)
+        return
     import uvicorn
     host = os.environ.get("OPH_WEB_HOST", "127.0.0.1")
     port = _bounded_env_int("OPH_WEB_PORT", 8765, 1, 65535)
